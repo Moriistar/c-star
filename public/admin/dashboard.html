@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>داشبورد مدیر | C-STAR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+<div class="wrap">
+  <h1 class="title">داشبورد مدیر</h1>
+
+  <div class="card">
+    <h3>افزودن کارت</h3>
+    <label>شماره کارت</label>
+    <input id="cardNumber" type="text" placeholder="5859 xxxx xxxx xxxx" />
+
+    <label>بانک</label>
+    <input id="cardBank" type="text" placeholder="مثلاً Tejarat" />
+
+    <label>دارنده کارت</label>
+    <input id="cardOwner" type="text" placeholder="نام دارنده" />
+
+    <button class="btn" onclick="adminAddCard()">افزودن کارت</button>
+    <div id="adminCardMsg" class="result"></div>
+  </div>
+
+  <div class="card">
+    <h3>لیست فاکتورها</h3>
+    <table class="table" id="adminInvTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>مبلغ</th>
+          <th>مبلغ یکتا</th>
+          <th>وضعیت</th>
+          <th>تاریخ</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="/assets/script.js"></script>
+</body>
+</html>
