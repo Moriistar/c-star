@@ -1,7 +1,16 @@
 #!/bin/bash
 
-echo -e "\n====== C-STAR AUTO INSTALL ======\n"
+echo -e "\n====== C-STAR FULL AUTO INSTALL ======\n"
 
+###########################################
+# 1) Detect Server IP
+###########################################
+SERVER_IP=$(curl -s ifconfig.me)
+echo -e "Detected Server IP: $SERVER_IP\n"
+
+###########################################
+# 2) Ask user inputs
+###########################################
 read -p "Enter PORT (default 3000): " PORT
 PORT=${PORT:-3000}
 
@@ -9,14 +18,42 @@ read -p "Enter ADMIN ID: " ADMIN_ID
 read -p "Enter BOT TOKEN: " BOT_TOKEN
 read -p "Enter CHAT ID: " CHAT_ID
 
-echo "Creating directories..."
+###########################################
+# 3) Install all required packages
+###########################################
+echo -e "\n>>> Installing dependencies...\n"
+
+apt update -y
+apt install -y curl git nginx
+
+# Install Node.js (Latest LTS)
+echo -e "\n>>> Installing Node.js...\n"
+curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
+apt install -y nodejs
+
+# Install pm2
+npm install -g pm2
+
+###########################################
+# 4) Prepare directories
+###########################################
+echo -e "\n>>> Creating project directory...\n"
+
 mkdir -p /opt/cstar
 rm -rf /opt/cstar/*
 
-echo "Downloading project..."
+###########################################
+# 5) Download project
+###########################################
+echo -e "\n>>> Downloading C-STAR project from GitHub...\n"
+
 git clone https://github.com/MoriiStar/c-star /opt/cstar
 
-echo "Creating .env..."
+###########################################
+# 6) Create .env file
+###########################################
+echo -e "\n>>> Creating .env file...\n"
+
 cat <<EOF >/opt/cstar/.env
 PORT=$PORT
 ADMIN_ID=$ADMIN_ID
@@ -25,49 +62,41 @@ CHAT_ID=$CHAT_ID
 DB_PATH=/opt/cstar/database/database.sqlite
 EOF
 
-echo "Installing dependencies..."
+###########################################
+# 7) Install backend dependencies
+###########################################
+echo -e "\n>>> Installing server dependencies...\n"
+
 cd /opt/cstar/server
 npm install
 
-echo "Configuring PM2..."
-npm install -g pm2
-pm2 start /opt/cstar/server/app.js --name cstar
-pm2 save
-pm2 startup
+###########################################
+# 8) Start PM2 Service
+###########################################
+echo -e "\n>>> Starting PM2 service...\n"
 
-echo "Configuring nginx..."
+pm2 start app.js --name cstar
+pm2 save
+pm2 startup -u root --hp /root
+
+###########################################
+# 9) Configure nginx
+###########################################
+echo -e "\n>>> Configuring nginx...\n"
+
 cp /opt/cstar/nginx.conf /etc/nginx/sites-available/cstar
 
-# Auto Port Replace
 sed -i "s|API_PORT|$PORT|g" /etc/nginx/sites-available/cstar
 
 ln -sf /etc/nginx/sites-available/cstar /etc/nginx/sites-enabled/cstar
 
 nginx -t && systemctl restart nginx
 
-echo -e "\nDone! Visit: http://YOUR-IP/\n"### 5) نصب Node Modules
-cd /opt/cstar
-npm install
-
-### 6) نصب PM2
-npm install -g pm2
-
-### 7) راه‌اندازی سرویس با PM2
-pm2 stop all
-pm2 start server/app.js --name cstar
-pm2 save
-pm2 startup
-
-### 8) کپی فایل NGINX
-cp /opt/cstar/nginx.conf /etc/nginx/sites-available/cstar
-ln -sf /etc/nginx/sites-available/cstar /etc/nginx/sites-enabled/cstar
-
-### 9) تست و ریستارت nginx
-nginx -t
-systemctl restart nginx
-
-echo "=========================================="
-echo "    نصب با موفقیت انجام شد!"
-echo "------------------------------------------"
-echo "   آدرس پنل: http://YOUR-IP/"
-echo "=========================================="
+###########################################
+# 10) Finish
+###########################################
+echo -e "\n======================================"
+echo -e " 🎉 Installation Completed Successfully!"
+echo -e " 🌐 Open your system at:"
+echo -e " 👉 http://$SERVER_IP:$PORT"
+echo -e "======================================\n"
