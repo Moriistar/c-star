@@ -1,40 +1,51 @@
 #!/bin/bash
 
-echo "=========================================="
-echo "      C-STAR INSTALLER - PRO EDITION"
-echo "=========================================="
-sleep 1
+echo -e "\n====== C-STAR AUTO INSTALL ======\n"
 
-### 1) دریافت اطلاعات از کاربر
-read -p "ادمین یوزرنیم: " ADMIN_USER
-read -p "ادمین پسورد: " ADMIN_PASS
-read -p "توکن ربات تلگرام (BOT TOKEN): " BOT_TOKEN
-read -p "چت آیدی (CHAT ID): " CHAT_ID
-read -p "پورت سرویس (مثال: 3000): " PORT
-read -p "رمز JWT_SECRET (هرچیزی): " JWT_SECRET
+read -p "Enter PORT (default 3000): " PORT
+PORT=${PORT:-3000}
 
-### 2) نصب پکیج‌های لازم
-apt update -y
-apt install nginx git curl nodejs npm -y
+read -p "Enter ADMIN ID: " ADMIN_ID
+read -p "Enter BOT TOKEN: " BOT_TOKEN
+read -p "Enter CHAT ID: " CHAT_ID
 
-### 3) کلون پروژه
-rm -rf /opt/cstar
-git clone https://github.com/MoriiStar/c-star.git /opt/cstar
+echo "Creating directories..."
+mkdir -p /opt/cstar
+rm -rf /opt/cstar/*
 
-### 4) ساخت فایل ENV
-cat <<EOF > /opt/cstar/.env
+echo "Downloading project..."
+git clone https://github.com/MoriiStar/c-star /opt/cstar
+
+echo "Creating .env..."
+cat <<EOF >/opt/cstar/.env
 PORT=$PORT
-ADMIN_USER=$ADMIN_USER
-ADMIN_PASS=$ADMIN_PASS
-JWT_SECRET=$JWT_SECRET
+ADMIN_ID=$ADMIN_ID
 BOT_TOKEN=$BOT_TOKEN
 CHAT_ID=$CHAT_ID
-DB_FILE=./server/database/main.db
+DB_PATH=/opt/cstar/database/database.sqlite
 EOF
 
-echo "[OK] فایل ENV ساخته شد"
+echo "Installing dependencies..."
+cd /opt/cstar/server
+npm install
 
-### 5) نصب Node Modules
+echo "Configuring PM2..."
+npm install -g pm2
+pm2 start /opt/cstar/server/app.js --name cstar
+pm2 save
+pm2 startup
+
+echo "Configuring nginx..."
+cp /opt/cstar/nginx.conf /etc/nginx/sites-available/cstar
+
+# Auto Port Replace
+sed -i "s|API_PORT|$PORT|g" /etc/nginx/sites-available/cstar
+
+ln -sf /etc/nginx/sites-available/cstar /etc/nginx/sites-enabled/cstar
+
+nginx -t && systemctl restart nginx
+
+echo -e "\nDone! Visit: http://YOUR-IP/\n"### 5) نصب Node Modules
 cd /opt/cstar
 npm install
 
