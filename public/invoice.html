@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>C-STAR | فاکتور پرداخت</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+<div class="wrap">
+  <h1 class="title">فاکتور پرداخت</h1>
+
+  <div class="card">
+    <div class="row">
+      <span class="label">شماره فاکتور:</span>
+      <span id="invToken" class="value">—</span>
+    </div>
+    <div class="row">
+      <span class="label">مبلغ:</span>
+      <span id="invAmount" class="value">—</span>
+    </div>
+    <div class="row">
+      <span class="label">مبلغ یکتا:</span>
+      <span id="invUnique" class="value">—</span>
+    </div>
+    <div class="row">
+      <span class="label">شماره تماس:</span>
+      <span id="invPhone" class="value">—</span>
+    </div>
+    <div class="row">
+      <span class="label">وضعیت:</span>
+      <span id="invStatus" class="badge badge-pending">در انتظار پرداخت</span>
+    </div>
+
+    <div class="hint">
+      لطفاً دقیقاً مبلغ یکتا را به کارت تعیین‌شده واریز کنید، سپس چند ثانیه صبر کرده و وضعیت را بررسی کنید.
+    </div>
+
+    <button class="btn" onclick="checkInvoiceStatus()">بررسی وضعیت</button>
+    <div id="invMsg" class="result"></div>
+  </div>
+</div>
+
+<script src="/assets/script.js"></script>
+</body>
+</html>
