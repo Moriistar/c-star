@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>C-STAR | ساخت لینک پرداخت</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+<div class="wrap">
+  <h1 class="title">C-STAR — ساخت لینک پرداخت</h1>
+
+  <div class="card">
+    <label>مبلغ (ریال)</label>
+    <input id="amount" type="number" placeholder="مثلاً 320000" />
+
+    <label>شماره موبایل (اختیاری)</label>
+    <input id="phone" type="text" placeholder="98912xxxxxxx" />
+
+    <label>کد مرچنت (اختیاری)</label>
+    <input id="merchant_id" type="number" placeholder="اگر خالی باشد، مرچنت ۱" />
+
+    <button class="btn" onclick="createInvoice()">ساخت لینک پرداخت</button>
+
+    <div id="indexResult" class="result"></div>
+  </div>
+
+  <div class="muted" style="margin-top:16px;">
+    لینک‌های مدیریتی:<br/>
+    <a href="/admin/login.html">ورود مدیر</a> ·
+    <a href="/merchant/login.html">ورود مرچنت</a>
+  </div>
+</div>
+
+<script src="/assets/script.js"></script>
+</body>
+</html>
