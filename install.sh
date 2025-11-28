@@ -1,56 +1,62 @@
 #!/bin/bash
-set -e
 
-echo "🔥 نصب C-STAR PRO ..."
+echo "=========================================="
+echo "      C-STAR INSTALLER - PRO EDITION"
+echo "=========================================="
+sleep 1
 
-# --------------------------
-# 1) نصب پکیج‌های لازم
-# --------------------------
+### 1) دریافت اطلاعات از کاربر
+read -p "ادمین یوزرنیم: " ADMIN_USER
+read -p "ادمین پسورد: " ADMIN_PASS
+read -p "توکن ربات تلگرام (BOT TOKEN): " BOT_TOKEN
+read -p "چت آیدی (CHAT ID): " CHAT_ID
+read -p "پورت سرویس (مثال: 3000): " PORT
+read -p "رمز JWT_SECRET (هرچیزی): " JWT_SECRET
+
+### 2) نصب پکیج‌های لازم
 apt update -y
-apt install -y nginx git curl sqlite3
+apt install nginx git curl nodejs npm -y
 
-# نصب Node.js اگر وجود ندارد
-if ! command -v node > /dev/null; then
-    echo "📦 نصب NodeJS 18..."
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-    apt install -y nodejs
-fi
-
-# --------------------------
-# 2) کلون پروژه
-# --------------------------
-echo "📥 دانلود پروژه در /opt/cstar ..."
+### 3) کلون پروژه
 rm -rf /opt/cstar
-git clone https://github.com/MoriiStar/c-star /opt/cstar
-cd /opt/cstar
+git clone https://github.com/MoriiStar/c-star.git /opt/cstar
 
-# --------------------------
-# 3) نصب وابستگی‌ها
-# --------------------------
+### 4) ساخت فایل ENV
+cat <<EOF > /opt/cstar/.env
+PORT=$PORT
+ADMIN_USER=$ADMIN_USER
+ADMIN_PASS=$ADMIN_PASS
+JWT_SECRET=$JWT_SECRET
+BOT_TOKEN=$BOT_TOKEN
+CHAT_ID=$CHAT_ID
+DB_FILE=./server/database/main.db
+EOF
+
+echo "[OK] فایل ENV ساخته شد"
+
+### 5) نصب Node Modules
+cd /opt/cstar
 npm install
 
-# --------------------------
-# 4) ساخت دیتابیس
-# --------------------------
-echo "🗄 ایجاد دیتابیس..."
-node server/database/init.js
-
-# --------------------------
-# 5) تنظیم nginx
-# --------------------------
-echo "⚙️ تنظیم nginx..."
-rm -f /etc/nginx/sites-enabled/default
-cp nginx.conf /etc/nginx/sites-available/cstar
-ln -sf /etc/nginx/sites-available/cstar /etc/nginx/sites-enabled/cstar
-systemctl restart nginx
-
-# --------------------------
-# 6) اجرای pm2
-# --------------------------
+### 6) نصب PM2
 npm install -g pm2
-pm2 stop cstar 2>/dev/null || true
+
+### 7) راه‌اندازی سرویس با PM2
+pm2 stop all
 pm2 start server/app.js --name cstar
 pm2 save
+pm2 startup
 
-echo "✅ نصب کامل شد!"
-echo "🌍 آدرس سایت: http://YOUR-IP/"
+### 8) کپی فایل NGINX
+cp /opt/cstar/nginx.conf /etc/nginx/sites-available/cstar
+ln -sf /etc/nginx/sites-available/cstar /etc/nginx/sites-enabled/cstar
+
+### 9) تست و ریستارت nginx
+nginx -t
+systemctl restart nginx
+
+echo "=========================================="
+echo "    نصب با موفقیت انجام شد!"
+echo "------------------------------------------"
+echo "   آدرس پنل: http://YOUR-IP/"
+echo "=========================================="
